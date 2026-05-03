@@ -9,8 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as FungalRouteImport } from './routes/fungal'
+import { Route as BacterialRouteImport } from './routes/bacterial'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
+const FungalRoute = FungalRouteImport.update({
+  id: '/fungal',
+  path: '/fungal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BacterialRoute = BacterialRouteImport.update({
+  id: '/bacterial',
+  path: '/bacterial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +37,61 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/bacterial': typeof BacterialRoute
+  '/fungal': typeof FungalRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/bacterial': typeof BacterialRoute
+  '/fungal': typeof FungalRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/bacterial': typeof BacterialRoute
+  '/fungal': typeof FungalRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/about' | '/bacterial' | '/fungal'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/about' | '/bacterial' | '/fungal'
+  id: '__root__' | '/' | '/about' | '/bacterial' | '/fungal'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  BacterialRoute: typeof BacterialRoute
+  FungalRoute: typeof FungalRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/fungal': {
+      id: '/fungal'
+      path: '/fungal'
+      fullPath: '/fungal'
+      preLoaderRoute: typeof FungalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bacterial': {
+      id: '/bacterial'
+      path: '/bacterial'
+      fullPath: '/bacterial'
+      preLoaderRoute: typeof BacterialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +104,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  BacterialRoute: BacterialRoute,
+  FungalRoute: FungalRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
