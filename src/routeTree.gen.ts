@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as FungalRouteImport } from './routes/fungal'
+import { Route as BacterialRouteImport } from './routes/bacterial'
 import { Route as IndexRouteImport } from './routes/index'
 
 const FungalRoute = FungalRouteImport.update({
   id: '/fungal',
   path: '/fungal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BacterialRoute = BacterialRouteImport.update({
+  id: '/bacterial',
+  path: '/bacterial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,27 +31,31 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bacterial': typeof BacterialRoute
   '/fungal': typeof FungalRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bacterial': typeof BacterialRoute
   '/fungal': typeof FungalRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bacterial': typeof BacterialRoute
   '/fungal': typeof FungalRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/fungal'
+  fullPaths: '/' | '/bacterial' | '/fungal'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/fungal'
-  id: '__root__' | '/' | '/fungal'
+  to: '/' | '/bacterial' | '/fungal'
+  id: '__root__' | '/' | '/bacterial' | '/fungal'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BacterialRoute: typeof BacterialRoute
   FungalRoute: typeof FungalRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/fungal'
       fullPath: '/fungal'
       preLoaderRoute: typeof FungalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bacterial': {
+      id: '/bacterial'
+      path: '/bacterial'
+      fullPath: '/bacterial'
+      preLoaderRoute: typeof BacterialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BacterialRoute: BacterialRoute,
   FungalRoute: FungalRoute,
 }
 export const routeTree = rootRouteImport
