@@ -13,6 +13,7 @@ export function Header() {
         <nav className="hidden items-center gap-1 md:flex">
           {[
             { to: "/", label: "Home" },
+            { to: "/linux", label: "Linux & CLI" },
             { to: "/fungal", label: "Fungal Genomics" },
             { to: "/bacterial", label: "Bacterial Genomics" },
             { to: "/about", label: "About" },
