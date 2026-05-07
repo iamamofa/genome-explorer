@@ -14,8 +14,10 @@ export function Header() {
           {[
             { to: "/", label: "Home" },
             { to: "/linux", label: "Linux & CLI" },
-            { to: "/fungal", label: "Fungal Genomics" },
-            { to: "/bacterial", label: "Bacterial Genomics" },
+            { to: "/fungal", label: "Fungal" },
+            { to: "/fungal-handbook", label: "Fungal Handbook" },
+            { to: "/bacterial", label: "Bacterial" },
+            { to: "/bacterial-handbook", label: "Bacterial Handbook" },
             { to: "/about", label: "About" },
           ].map((item) => (
             <Link
