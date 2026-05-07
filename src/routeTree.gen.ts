@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LinuxRouteImport } from './routes/linux'
+import { Route as FungalHandbookRouteImport } from './routes/fungal-handbook'
 import { Route as FungalRouteImport } from './routes/fungal'
 import { Route as BacterialHandbookRouteImport } from './routes/bacterial-handbook'
 import { Route as BacterialRouteImport } from './routes/bacterial'
@@ -19,6 +20,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const LinuxRoute = LinuxRouteImport.update({
   id: '/linux',
   path: '/linux',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FungalHandbookRoute = FungalHandbookRouteImport.update({
+  id: '/fungal-handbook',
+  path: '/fungal-handbook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FungalRoute = FungalRouteImport.update({
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/bacterial': typeof BacterialRoute
   '/bacterial-handbook': typeof BacterialHandbookRoute
   '/fungal': typeof FungalRoute
+  '/fungal-handbook': typeof FungalHandbookRoute
   '/linux': typeof LinuxRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/bacterial': typeof BacterialRoute
   '/bacterial-handbook': typeof BacterialHandbookRoute
   '/fungal': typeof FungalRoute
+  '/fungal-handbook': typeof FungalHandbookRoute
   '/linux': typeof LinuxRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/bacterial': typeof BacterialRoute
   '/bacterial-handbook': typeof BacterialHandbookRoute
   '/fungal': typeof FungalRoute
+  '/fungal-handbook': typeof FungalHandbookRoute
   '/linux': typeof LinuxRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/bacterial'
     | '/bacterial-handbook'
     | '/fungal'
+    | '/fungal-handbook'
     | '/linux'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/bacterial'
     | '/bacterial-handbook'
     | '/fungal'
+    | '/fungal-handbook'
     | '/linux'
   id:
     | '__root__'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/bacterial'
     | '/bacterial-handbook'
     | '/fungal'
+    | '/fungal-handbook'
     | '/linux'
   fileRoutesById: FileRoutesById
 }
@@ -105,6 +117,7 @@ export interface RootRouteChildren {
   BacterialRoute: typeof BacterialRoute
   BacterialHandbookRoute: typeof BacterialHandbookRoute
   FungalRoute: typeof FungalRoute
+  FungalHandbookRoute: typeof FungalHandbookRoute
   LinuxRoute: typeof LinuxRoute
 }
 
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/linux'
       fullPath: '/linux'
       preLoaderRoute: typeof LinuxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fungal-handbook': {
+      id: '/fungal-handbook'
+      path: '/fungal-handbook'
+      fullPath: '/fungal-handbook'
+      preLoaderRoute: typeof FungalHandbookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fungal': {
@@ -161,8 +181,18 @@ const rootRouteChildren: RootRouteChildren = {
   BacterialRoute: BacterialRoute,
   BacterialHandbookRoute: BacterialHandbookRoute,
   FungalRoute: FungalRoute,
+  FungalHandbookRoute: FungalHandbookRoute,
   LinuxRoute: LinuxRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
