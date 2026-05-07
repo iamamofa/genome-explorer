@@ -585,7 +585,7 @@ amrfinder -n spades_SAMP01/scaffolds.fasta -O Staphylococcus_aureus -o SAMP01.ts
 
 # Abricate against multiple DBs
 for db in card resfinder ncbi vfdb; do
-  abricate --db $db spades_SAMP01/scaffolds.fasta > SAMP01_${db}.tab
+  abricate --db $db spades_SAMP01/scaffolds.fasta > SAMP01_$\{db}.tab
 done` },
         ],
       },
