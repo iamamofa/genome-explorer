@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 
@@ -14,7 +15,7 @@ export interface ChapterBlock {
 
 export interface Chapter {
   id: string;
-  number: string; // "1", "A"
+  number: string;
   title: string;
   summary?: string;
   blocks: ChapterBlock[];
@@ -25,8 +26,19 @@ export interface Part {
   chapters: Chapter[];
 }
 
+export interface Dataset {
+  name: string;
+  source: string;          // Zenodo / ENA / NCBI / FungiDB
+  accession: string;
+  url: string;
+  size?: string;
+  description: string;
+  command?: string;        // wget / curl example
+}
+
 interface Props {
   variant: "fungi" | "bacteria";
+  slug: "fungal-handbook" | "bacterial-handbook";
   title: string;
   authors: string;
   published: string;
@@ -36,32 +48,43 @@ interface Props {
   prerequisites: { essential: string[]; desirable: string[] };
   citation: string;
   parts: Part[];
+  datasets?: Dataset[];
 }
 
-export function BookCourse({ variant, title, authors, published, overview, objectives, audience, prerequisites, citation, parts }: Props) {
+export function BookCourse({ variant, slug, title, authors, published, overview, objectives, audience, prerequisites, citation, parts, datasets = [] }: Props) {
   const accent = variant === "fungi" ? "bg-gradient-fungi" : "bg-gradient-bacteria";
-  const allChapters = useMemo(() => {
-    const list: { partTitle: string; chapter: Chapter }[] = [
-      { partTitle: "Welcome", chapter: { id: "welcome", number: "", title: "Welcome", blocks: [] } },
-    ];
-    parts.forEach((p) => p.chapters.forEach((c) => list.push({ partTitle: p.title, chapter: c })));
-    return list;
-  }, [parts]);
-
   const [activeId, setActiveId] = useState<string>("welcome");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const filteredParts = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return parts;
+    return parts
+      .map((p) => ({
+        ...p,
+        chapters: p.chapters.filter((c) =>
+          c.title.toLowerCase().includes(q) ||
+          c.number.toLowerCase().includes(q) ||
+          (c.summary || "").toLowerCase().includes(q) ||
+          c.blocks.some((b) => (b.text || "").toLowerCase().includes(q)),
+        ),
+      }))
+      .filter((p) => p.chapters.length > 0);
+  }, [parts, query]);
 
   useEffect(() => {
+    const ids = ["welcome", "datasets", ...parts.flatMap((p) => p.chapters.map((c) => c.id))];
     const opts = { rootMargin: "-30% 0px -60% 0px", threshold: 0 };
     const obs = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) setActiveId(e.target.id); });
     }, opts);
-    allChapters.forEach((c) => {
-      const el = document.getElementById(c.chapter.id);
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
       if (el) obs.observe(el);
     });
     return () => obs.disconnect();
-  }, [allChapters]);
+  }, [parts]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,16 +99,35 @@ export function BookCourse({ variant, title, authors, published, overview, objec
 
         <div className="flex gap-8 pb-24">
           {/* Sidebar */}
-          <aside className={`${sidebarOpen ? "block" : "hidden"} lg:block lg:sticky lg:top-20 h-fit lg:max-h-[calc(100vh-6rem)] overflow-y-auto w-full lg:w-72 shrink-0 rounded-2xl border border-border bg-card p-4 text-sm`}>
+          <aside className={`${sidebarOpen ? "block" : "hidden"} lg:block lg:sticky lg:top-20 h-fit lg:max-h-[calc(100vh-6rem)] overflow-y-auto w-full lg:w-80 shrink-0 rounded-2xl border border-border bg-card p-4 text-sm`}>
             <div className="mb-3 px-2">
-              <span className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white ${accent}`}>Slides</span>
+              <span className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white ${accent}`}>Handbook</span>
               <h2 className="mt-2 font-display text-base font-semibold leading-tight">{title}</h2>
             </div>
+
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search chapters & content…"
+              className="mb-3 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            />
+            {query && (
+              <p className="mb-2 px-2 text-xs text-muted-foreground">
+                {filteredParts.reduce((n, p) => n + p.chapters.length, 0)} matches
+              </p>
+            )}
+
             <nav className="space-y-3">
               <a href="#welcome" onClick={() => setSidebarOpen(false)} className={`block rounded px-2 py-1.5 ${activeId === "welcome" ? "bg-accent font-semibold text-foreground" : "text-muted-foreground hover:bg-accent/50"}`}>
                 Welcome
               </a>
-              {parts.map((part) => (
+              {datasets.length > 0 && (
+                <a href="#datasets" onClick={() => setSidebarOpen(false)} className={`block rounded px-2 py-1.5 ${activeId === "datasets" ? "bg-accent font-semibold text-foreground" : "text-muted-foreground hover:bg-accent/50"}`}>
+                  📦 Datasets ({datasets.length})
+                </a>
+              )}
+              {filteredParts.map((part) => (
                 <div key={part.title}>
                   <p className="px-2 pt-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/80">{part.title}</p>
                   <ul className="mt-1 space-y-0.5">
@@ -162,16 +204,24 @@ export function BookCourse({ variant, title, authors, published, overview, objec
               </div>
             </section>
 
+            {datasets.length > 0 && <DatasetsSection datasets={datasets} accent={accent} />}
+
             <hr className="my-12 border-border" />
 
-            {parts.map((part) => (
+            {filteredParts.map((part) => (
               <div key={part.title}>
                 <p className="mt-12 mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{part.title}</p>
                 {part.chapters.map((ch) => (
-                  <ChapterView key={ch.id} chapter={ch} accent={accent} />
+                  <ChapterView key={ch.id} chapter={ch} accent={accent} slug={slug} />
                 ))}
               </div>
             ))}
+
+            {query && filteredParts.length === 0 && (
+              <p className="rounded-xl border border-dashed border-border bg-surface p-8 text-center text-muted-foreground">
+                No chapters match “{query}”.
+              </p>
+            )}
           </main>
         </div>
       </div>
@@ -180,7 +230,50 @@ export function BookCourse({ variant, title, authors, published, overview, objec
   );
 }
 
-function ChapterView({ chapter, accent }: { chapter: Chapter; accent: string }) {
+function DatasetsSection({ datasets, accent }: { datasets: Dataset[]; accent: string }) {
+  return (
+    <section id="datasets" className="scroll-mt-20 mt-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
+      <div className="flex items-baseline gap-3">
+        <span className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 font-mono text-sm font-semibold text-white ${accent}`}>📦</span>
+        <h2 className="font-display text-3xl font-semibold">Course Datasets</h2>
+      </div>
+      <p className="mt-2 text-muted-foreground">All datasets used by the practical chapters. Click <em>Open</em> to visit the source page, or copy the download command.</p>
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        {datasets.map((d) => (
+          <div key={d.accession} className="rounded-xl border border-border bg-background p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="font-display text-lg font-semibold leading-tight">{d.name}</h3>
+                <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
+                  {d.source} · <span className="font-mono normal-case">{d.accession}</span>{d.size && <> · {d.size}</>}
+                </p>
+              </div>
+              <a href={d.url} target="_blank" rel="noreferrer" className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold text-white ${accent}`}>Open ↗</a>
+            </div>
+            <p className="mt-3 text-sm text-foreground/90">{d.description}</p>
+            {d.command && (
+              <pre className="mt-3 overflow-x-auto rounded-md bg-foreground/95 p-3 font-mono text-[12px] leading-snug text-background">
+                <code>{d.command}</code>
+              </pre>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ChapterView({ chapter, accent, slug }: { chapter: Chapter; accent: string; slug: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const onCopy = () => {
+    if (typeof window === "undefined") return;
+    const url = `${window.location.origin}${window.location.pathname}#${chapter.id}`;
+    navigator.clipboard?.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
   return (
     <section id={chapter.id} className="scroll-mt-20 border-t border-border py-10">
       <div className="flex items-baseline gap-3">
@@ -188,6 +281,20 @@ function ChapterView({ chapter, accent }: { chapter: Chapter; accent: string }) 
           {chapter.number}
         </span>
         <h2 className="font-display text-3xl font-semibold leading-tight sm:text-[34px]">{chapter.title}</h2>
+        <button
+          onClick={onCopy}
+          title="Copy chapter link"
+          className="ml-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+        >
+          {copied ? "✓ copied" : "🔗"}
+        </button>
+        <Link
+          to={`/${slug}/chapter/$chapterId` as any}
+          params={{ chapterId: chapter.id }}
+          className="ml-auto rounded-md border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+        >
+          Open page →
+        </Link>
       </div>
       {chapter.summary && <p className="mt-3 text-lg italic text-muted-foreground">{chapter.summary}</p>}
       <div className="mt-6 space-y-5 text-[16px] leading-relaxed text-foreground/90">
@@ -197,7 +304,7 @@ function ChapterView({ chapter, accent }: { chapter: Chapter; accent: string }) 
   );
 }
 
-function Block({ block }: { block: ChapterBlock }) {
+export function Block({ block }: { block: ChapterBlock }) {
   switch (block.type) {
     case "p":
       return <p>{block.text}</p>;
@@ -266,5 +373,3 @@ function Block({ block }: { block: ChapterBlock }) {
       return null;
   }
 }
-
-export type { ChapterBlock as Block };
