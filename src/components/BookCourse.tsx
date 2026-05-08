@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 
