@@ -106,6 +106,8 @@ export const datasets: Dataset[] = [
     command: "datasets download genome accession GCF_000195955.2 --include genome,gff3",
   },
 ];
+
+export const parts: Part[] = [
   {
     title: "Introduction",
     chapters: [
