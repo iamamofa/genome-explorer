@@ -16,6 +16,7 @@ import { Route as BacterialHandbookRouteImport } from './routes/bacterial-handbo
 import { Route as BacterialRouteImport } from './routes/bacterial'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BacterialHandbookChapterChapterIdRouteImport } from './routes/bacterial-handbook.chapter.$chapterId'
 
 const LinuxRoute = LinuxRouteImport.update({
   id: '/linux',
@@ -52,34 +53,43 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BacterialHandbookChapterChapterIdRoute =
+  BacterialHandbookChapterChapterIdRouteImport.update({
+    id: '/chapter/$chapterId',
+    path: '/chapter/$chapterId',
+    getParentRoute: () => BacterialHandbookRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/bacterial': typeof BacterialRoute
-  '/bacterial-handbook': typeof BacterialHandbookRoute
+  '/bacterial-handbook': typeof BacterialHandbookRouteWithChildren
   '/fungal': typeof FungalRoute
   '/fungal-handbook': typeof FungalHandbookRoute
   '/linux': typeof LinuxRoute
+  '/bacterial-handbook/chapter/$chapterId': typeof BacterialHandbookChapterChapterIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/bacterial': typeof BacterialRoute
-  '/bacterial-handbook': typeof BacterialHandbookRoute
+  '/bacterial-handbook': typeof BacterialHandbookRouteWithChildren
   '/fungal': typeof FungalRoute
   '/fungal-handbook': typeof FungalHandbookRoute
   '/linux': typeof LinuxRoute
+  '/bacterial-handbook/chapter/$chapterId': typeof BacterialHandbookChapterChapterIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/bacterial': typeof BacterialRoute
-  '/bacterial-handbook': typeof BacterialHandbookRoute
+  '/bacterial-handbook': typeof BacterialHandbookRouteWithChildren
   '/fungal': typeof FungalRoute
   '/fungal-handbook': typeof FungalHandbookRoute
   '/linux': typeof LinuxRoute
+  '/bacterial-handbook/chapter/$chapterId': typeof BacterialHandbookChapterChapterIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +101,7 @@ export interface FileRouteTypes {
     | '/fungal'
     | '/fungal-handbook'
     | '/linux'
+    | '/bacterial-handbook/chapter/$chapterId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +111,7 @@ export interface FileRouteTypes {
     | '/fungal'
     | '/fungal-handbook'
     | '/linux'
+    | '/bacterial-handbook/chapter/$chapterId'
   id:
     | '__root__'
     | '/'
@@ -109,13 +121,14 @@ export interface FileRouteTypes {
     | '/fungal'
     | '/fungal-handbook'
     | '/linux'
+    | '/bacterial-handbook/chapter/$chapterId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   BacterialRoute: typeof BacterialRoute
-  BacterialHandbookRoute: typeof BacterialHandbookRoute
+  BacterialHandbookRoute: typeof BacterialHandbookRouteWithChildren
   FungalRoute: typeof FungalRoute
   FungalHandbookRoute: typeof FungalHandbookRoute
   LinuxRoute: typeof LinuxRoute
@@ -172,14 +185,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bacterial-handbook/chapter/$chapterId': {
+      id: '/bacterial-handbook/chapter/$chapterId'
+      path: '/chapter/$chapterId'
+      fullPath: '/bacterial-handbook/chapter/$chapterId'
+      preLoaderRoute: typeof BacterialHandbookChapterChapterIdRouteImport
+      parentRoute: typeof BacterialHandbookRoute
+    }
   }
 }
+
+interface BacterialHandbookRouteChildren {
+  BacterialHandbookChapterChapterIdRoute: typeof BacterialHandbookChapterChapterIdRoute
+}
+
+const BacterialHandbookRouteChildren: BacterialHandbookRouteChildren = {
+  BacterialHandbookChapterChapterIdRoute:
+    BacterialHandbookChapterChapterIdRoute,
+}
+
+const BacterialHandbookRouteWithChildren =
+  BacterialHandbookRoute._addFileChildren(BacterialHandbookRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   BacterialRoute: BacterialRoute,
-  BacterialHandbookRoute: BacterialHandbookRoute,
+  BacterialHandbookRoute: BacterialHandbookRouteWithChildren,
   FungalRoute: FungalRoute,
   FungalHandbookRoute: FungalHandbookRoute,
   LinuxRoute: LinuxRoute,
