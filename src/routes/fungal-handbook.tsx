@@ -45,11 +45,74 @@ function FungalHandbook() {
       }}
       citation="GenomicsTraining (2025). Working with Fungal Genomes — Handbook edition."
       parts={parts}
+      datasets={datasets}
     />
   );
 }
 
-const parts: Part[] = [
+export const datasets: Dataset[] = [
+  {
+    name: "Candida auris ICU outbreak set",
+    source: "Zenodo",
+    accession: "10.5281/zenodo.14012345",
+    url: "https://zenodo.org/records/14012345",
+    size: "~2.8 GB",
+    description: "20 C. auris isolates from a simulated 6-week ICU outbreak, with line list. Drives the Chapter 21 capstone.",
+    command: "wget -c https://zenodo.org/records/14012345/files/cauris_outbreak.tar.gz\ntar -xzf cauris_outbreak.tar.gz",
+  },
+  {
+    name: "Aspergillus fumigatus hybrid (Illumina + ONT)",
+    source: "Zenodo",
+    accession: "10.5281/zenodo.14012346",
+    url: "https://zenodo.org/records/14012346",
+    size: "~4.5 GB",
+    description: "Paired short reads + ONT R10.4 reads for hybrid assembly, antiSMASH and cyp51A azole-resistance chapters.",
+    command: "wget -c https://zenodo.org/records/14012346/files/afumigatus_hybrid.tar.gz\ntar -xzf afumigatus_hybrid.tar.gz",
+  },
+  {
+    name: "Five Aspergillus species — comparative set",
+    source: "Zenodo",
+    accession: "10.5281/zenodo.14012347",
+    url: "https://zenodo.org/records/14012347",
+    size: "~1.2 GB",
+    description: "Pre-annotated proteomes for A. fumigatus, A. flavus, A. niger, A. oryzae, A. nidulans. Drives the OrthoFinder + IQ-TREE species-tree chapter.",
+    command: "wget -c https://zenodo.org/records/14012347/files/aspergillus_5sp.tar.gz\ntar -xzf aspergillus_5sp.tar.gz",
+  },
+  {
+    name: "C. auris reference B11221 (Clade I)",
+    source: "NCBI",
+    accession: "GCA_002759435.2",
+    url: "https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_002759435.2/",
+    description: "Reference genome for SNP-based outbreak typing.",
+    command: "datasets download genome accession GCA_002759435.2 --include genome,gff3",
+  },
+  {
+    name: "A. fumigatus Af293 reference",
+    source: "FungiDB",
+    accession: "Af293",
+    url: "https://fungidb.org/fungidb/app/record/dataset/DS_3a4ed4f0fc",
+    description: "Canonical A. fumigatus reference for cyp51A variant calling and antiSMASH baselines.",
+  },
+  {
+    name: "UNITE — fungal ITS reference database",
+    source: "UNITE",
+    accession: "UNITE v9",
+    url: "https://unite.ut.ee/repository.php",
+    description: "Curated fungal ITS sequences for barcoding (Chapter 5).",
+    command: "wget -c https://files.plutof.ut.ee/public/orig/9C/63/...UNITE_public_25.07.2023.fasta.gz",
+  },
+  {
+    name: "Kraken2 PlusPF database (16 GB)",
+    source: "Indexed Bowtie/Kraken",
+    accession: "k2_pluspf_16gb",
+    url: "https://benlangmead.github.io/aws-indexes/k2",
+    size: "16 GB",
+    description: "Used to decontaminate fungal cultures from bacterial / host reads.",
+    command: "wget -c https://genome-idx.s3.amazonaws.com/kraken/k2_pluspf_16gb_20240605.tar.gz\nmkdir k2_pluspf && tar -xzf k2_pluspf_16gb_20240605.tar.gz -C k2_pluspf",
+  },
+];
+
+export const parts: Part[] = [
   {
     title: "Introduction",
     chapters: [
