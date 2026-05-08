@@ -17,6 +17,7 @@ function FungalHandbook() {
   return (
     <BookCourse
       variant="fungi"
+      slug="fungal-handbook"
       title="Working with Fungal Genomes"
       authors="GenomicsTraining team — adapted from cambiotraining materials"
       published="November 12, 2025"
