@@ -359,6 +359,95 @@ iqtree2 -s concat.aa.fasta -p partitions.txt -m TESTMERGE -B 1000 -nt AUTO` },
       { id: "ch20", number: "20", title: "Synteny with MCscanX / pyMCscan",
         blocks: [
           { type: "p", text: "Once you have orthogroups, plot syntenic blocks across species to spot rearrangements, lineage-specific regions and horizontal transfer." },
+          { type: "code", text: `# Prepare GFF + protein BED, then run MCScanX
+python -m jcvi.formats.gff bed --type=mRNA --key=ID Af293.gff3 -o Af293.bed
+python -m jcvi.compara.catalog ortholog Af293 Aniger
+python -m jcvi.graphics.dotplot Af293.Aniger.anchors` },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Population genomics",
+    chapters: [
+      { id: "ch20a", number: "20a", title: "Variant calling on diploid Candida",
+        blocks: [
+          { type: "p", text: "C. auris is haploid (--ploidy 1) but C. albicans is diploid — bcftools and GATK behave differently. Use --ploidy 2 with HaplotypeCaller for diploids, and remember that LOH (loss-of-heterozygosity) is a major signal of micro-evolution under antifungal pressure." },
+          { type: "code", text: `gatk HaplotypeCaller -R Ca22.fa -I SAMP.bam -O SAMP.g.vcf.gz \\
+                     --sample-ploidy 2 -ERC GVCF` },
+        ],
+      },
+      { id: "ch20b", number: "20b", title: "cgMLST with chewBBACA",
+        blocks: [
+          { type: "p", text: "Core-genome MLST defines an allele for every gene in the species core. chewBBACA uses your assemblies plus a curated training file to call alleles fast — the C. auris scheme has ~ 1650 loci." },
+          { type: "code", text: `chewBBACA.py CreateSchema -i prot/ -o cauris_schema --ptf C_auris.trn --cpu 8
+chewBBACA.py AlleleCall -i assemblies/ -g cauris_schema/schema_seed -o allele_calls --cpu 8
+chewBBACA.py ExtractCgMLST -i allele_calls/results_alleles.tsv -o cgmlst_out` },
+        ],
+      },
+      { id: "ch20c", number: "20c", title: "Population structure with fastBAPS",
+        blocks: [
+          { type: "p", text: "Once you have a SNP alignment, fastBAPS partitions isolates into hierarchical Bayesian clusters in seconds — useful for assigning new isolates to clades I–V of C. auris." },
+          { type: "code", text: `library(fastbaps)
+sparse <- import_fasta_sparse_nt("cauris.snps.fasta")
+baps   <- best_baps_partition(sparse, fast_baps(sparse))` },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Plant & environmental fungi",
+    chapters: [
+      { id: "ch20d", number: "20d", title: "Effector prediction (EffectorP, SignalP)",
+        blocks: [
+          { type: "p", text: "Plant-pathogenic fungi (Fusarium, Magnaporthe, Zymoseptoria) deploy small secreted effector proteins to suppress host immunity. EffectorP 3.0 classifies them from secretomes." },
+          { type: "code", text: `signalp6 --fastafile proteins.fa --output_dir sigp6 --organism eukarya --mode fast
+EffectorP.py -i sigp6/processed_entries.fasta -o effectorp.tsv` },
+        ],
+      },
+      { id: "ch20e", number: "20e", title: "Mycotoxin BGCs",
+        blocks: [
+          { type: "p", text: "antiSMASH plus the MIBiG knownclusterblast hits will flag aflatoxin (A. flavus), fumonisin (F. verticillioides), trichothecene (F. graminearum) and gliotoxin (A. fumigatus) BGCs. Cross-check against MycoCosm for genomic context." },
+          { type: "tip", text: "If a sample looks negative for an expected toxin BGC, check coverage drop-outs first — Flye sometimes splits BGCs across contigs, hiding clusters from antiSMASH." },
+        ],
+      },
+      { id: "ch20f", number: "20f", title: "Mating type & ploidy detection",
+        blocks: [
+          { type: "p", text: "Mating-type loci (MAT1-1 / MAT1-2) determine sexual compatibility. Use genome-wide k-mer counts (smudgeplot, jellyfish) to confirm ploidy before assembly — diploids can ruin a haploid assembler." },
+          { type: "code", text: `jellyfish count -C -m 21 -s 1G -t 8 SAMP_R1.fq.gz SAMP_R2.fq.gz -o reads.jf
+jellyfish histo -t 8 reads.jf > reads.histo
+genomescope2 -i reads.histo -k 21 -p 2 -o gscope_SAMP` },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Workflows at scale",
+    chapters: [
+      { id: "ch20g", number: "20g", title: "nf-core/funcscan for fungi",
+        blocks: [
+          { type: "p", text: "funcscan is bacteria-first but its AMR + BGC modules (DeepARG, antiSMASH, hAMRonization) are fungi-compatible if you supply --skip_taxa_classification and a fungi-aware annotation." },
+          { type: "code", text: `nextflow run nf-core/funcscan -r 2.0.0 \\
+  --input fungi_samplesheet.csv --run_arg_screening --run_bgc_screening \\
+  --skip_taxa_classification --outdir funcscan_fungi -profile docker` },
+        ],
+      },
+      { id: "ch20h", number: "20h", title: "HPC, SLURM and resource budgeting",
+        blocks: [
+          { type: "table",
+            headers: ["Tool", "CPUs", "RAM", "Walltime / 30 Mb genome"],
+            rows: [
+              ["fastp", "4", "2 GB", "5 min"],
+              ["SPAdes --isolate", "16", "32 GB", "45 min"],
+              ["Flye --nano-hq", "16", "48 GB", "90 min"],
+              ["funannotate predict", "16", "32 GB", "6–8 h"],
+              ["antiSMASH 7", "8", "16 GB", "30 min"],
+              ["OrthoFinder (5 sp)", "32", "32 GB", "2 h"],
+            ],
+          },
+          { type: "code", text: `# Nextflow on SLURM
+nextflow run main.nf -profile slurm,singularity \\
+  --queue normal --max_memory 64.GB --max_cpus 16` },
         ],
       },
     ],
