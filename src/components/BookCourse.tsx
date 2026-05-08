@@ -288,13 +288,12 @@ function ChapterView({ chapter, accent, slug }: { chapter: Chapter; accent: stri
         >
           {copied ? "✓ copied" : "🔗"}
         </button>
-        <Link
-          to={`/${slug}/chapter/$chapterId` as any}
-          params={{ chapterId: chapter.id }}
+        <a
+          href={`/${slug}/chapter/${chapter.id}`}
           className="ml-auto rounded-md border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           Open page →
-        </Link>
+        </a>
       </div>
       {chapter.summary && <p className="mt-3 text-lg italic text-muted-foreground">{chapter.summary}</p>}
       <div className="mt-6 space-y-5 text-[16px] leading-relaxed text-foreground/90">
