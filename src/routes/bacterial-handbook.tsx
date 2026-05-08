@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookCourse, type Part } from "@/components/BookCourse";
+import { BookCourse, type Part, type Dataset } from "@/components/BookCourse";
 
 export const Route = createFileRoute("/bacterial-handbook")({
   component: BacterialHandbook,
@@ -17,6 +17,7 @@ function BacterialHandbook() {
   return (
     <BookCourse
       variant="bacteria"
+      slug="bacterial-handbook"
       title="Working with Bacterial Genomes"
       authors="Andries van Tonder; Hugo Tavares; Bajuna Salehe"
       published="November 12, 2025"
@@ -46,11 +47,67 @@ function BacterialHandbook() {
       }}
       citation='van Tonder, A., Tavares, H., Salehe, B. (2025). Working with Bacterial Genomes. Adapted from cambiotraining.github.io/bacterial-genomics/'
       parts={parts}
+      datasets={datasets}
     />
   );
 }
 
-const parts: Part[] = [
+export const datasets: Dataset[] = [
+  {
+    name: "Yemen Cholera Outbreak — Vibrio cholerae",
+    source: "Zenodo",
+    accession: "10.5281/zenodo.8208161",
+    url: "https://zenodo.org/records/8208161",
+    size: "~1.4 GB",
+    description: "Subset of 24 V. cholerae O1 isolates from the 2016–2018 Yemen outbreak. Used for reference mapping (N16961) and phylogeny chapters.",
+    command: "wget -c https://zenodo.org/records/8208161/files/cholera_subset.tar.gz\ntar -xzf cholera_subset.tar.gz",
+  },
+  {
+    name: "Mycobacterium tuberculosis training set",
+    source: "Zenodo",
+    accession: "10.5281/zenodo.10650190",
+    url: "https://zenodo.org/records/10650190",
+    size: "~2.1 GB",
+    description: "Ten MTB isolates spanning lineages 1–4 with paired-end Illumina reads. Drives the bacQC, bactmap, IQ-TREE and TB-Profiler chapters.",
+    command: "wget -c https://zenodo.org/records/10650190/files/mtb_training.tar.gz\ntar -xzf mtb_training.tar.gz",
+  },
+  {
+    name: "S. pneumoniae GPSC1 outbreak set",
+    source: "Zenodo",
+    accession: "10.5281/zenodo.14191636",
+    url: "https://zenodo.org/records/14191636",
+    size: "~3.0 GB",
+    description: "30 S. pneumoniae isolates from a simulated outbreak — pan-genome, recombination (Gubbins), and PopPUNK chapters.",
+    command: "wget -c https://zenodo.org/records/14191636/files/pneumo_outbreak.tar.gz\ntar -xzf pneumo_outbreak.tar.gz",
+  },
+  {
+    name: "Klebsiella pneumoniae carbapenem outbreak (Outbreak Alert!)",
+    source: "ENA",
+    accession: "PRJEB30604",
+    url: "https://www.ebi.ac.uk/ena/browser/view/PRJEB30604",
+    size: "~6 GB",
+    description: "ICU outbreak isolates with KPC/NDM/OXA carbapenemases. Used in the Chapter 42 capstone.",
+    command: "nextflow run nf-core/fetchngs -r 1.12.0 \\\n  --input ids.csv --outdir fetched/ -profile docker",
+  },
+  {
+    name: "S. aureus reference and assemblies",
+    source: "NCBI",
+    accession: "GCF_000013425.1",
+    url: "https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000013425.1/",
+    description: "S. aureus NCTC 8325 reference for assembly QC and Bakta annotation chapters.",
+    command: "datasets download genome accession GCF_000013425.1 --include genome,gff3,protein\nunzip ncbi_dataset.zip",
+  },
+  {
+    name: "H37Rv reference (M. tuberculosis)",
+    source: "NCBI",
+    accession: "NC_000962.3",
+    url: "https://www.ncbi.nlm.nih.gov/nuccore/NC_000962.3",
+    description: "Canonical TB reference used by bactmap and TB-Profiler.",
+    command: "datasets download genome accession GCF_000195955.2 --include genome,gff3",
+  },
+];
+
+export const parts: Part[] = [
   {
     title: "Introduction",
     chapters: [

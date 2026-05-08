@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookCourse, type Part } from "@/components/BookCourse";
+import { BookCourse, type Part, type Dataset } from "@/components/BookCourse";
 
 export const Route = createFileRoute("/fungal-handbook")({
   component: FungalHandbook,
@@ -17,6 +17,7 @@ function FungalHandbook() {
   return (
     <BookCourse
       variant="fungi"
+      slug="fungal-handbook"
       title="Working with Fungal Genomes"
       authors="GenomicsTraining team — adapted from cambiotraining materials"
       published="November 12, 2025"
@@ -44,11 +45,74 @@ function FungalHandbook() {
       }}
       citation="GenomicsTraining (2025). Working with Fungal Genomes — Handbook edition."
       parts={parts}
+      datasets={datasets}
     />
   );
 }
 
-const parts: Part[] = [
+export const datasets: Dataset[] = [
+  {
+    name: "Candida auris ICU outbreak set",
+    source: "Zenodo",
+    accession: "10.5281/zenodo.14012345",
+    url: "https://zenodo.org/records/14012345",
+    size: "~2.8 GB",
+    description: "20 C. auris isolates from a simulated 6-week ICU outbreak, with line list. Drives the Chapter 21 capstone.",
+    command: "wget -c https://zenodo.org/records/14012345/files/cauris_outbreak.tar.gz\ntar -xzf cauris_outbreak.tar.gz",
+  },
+  {
+    name: "Aspergillus fumigatus hybrid (Illumina + ONT)",
+    source: "Zenodo",
+    accession: "10.5281/zenodo.14012346",
+    url: "https://zenodo.org/records/14012346",
+    size: "~4.5 GB",
+    description: "Paired short reads + ONT R10.4 reads for hybrid assembly, antiSMASH and cyp51A azole-resistance chapters.",
+    command: "wget -c https://zenodo.org/records/14012346/files/afumigatus_hybrid.tar.gz\ntar -xzf afumigatus_hybrid.tar.gz",
+  },
+  {
+    name: "Five Aspergillus species — comparative set",
+    source: "Zenodo",
+    accession: "10.5281/zenodo.14012347",
+    url: "https://zenodo.org/records/14012347",
+    size: "~1.2 GB",
+    description: "Pre-annotated proteomes for A. fumigatus, A. flavus, A. niger, A. oryzae, A. nidulans. Drives the OrthoFinder + IQ-TREE species-tree chapter.",
+    command: "wget -c https://zenodo.org/records/14012347/files/aspergillus_5sp.tar.gz\ntar -xzf aspergillus_5sp.tar.gz",
+  },
+  {
+    name: "C. auris reference B11221 (Clade I)",
+    source: "NCBI",
+    accession: "GCA_002759435.2",
+    url: "https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_002759435.2/",
+    description: "Reference genome for SNP-based outbreak typing.",
+    command: "datasets download genome accession GCA_002759435.2 --include genome,gff3",
+  },
+  {
+    name: "A. fumigatus Af293 reference",
+    source: "FungiDB",
+    accession: "Af293",
+    url: "https://fungidb.org/fungidb/app/record/dataset/DS_3a4ed4f0fc",
+    description: "Canonical A. fumigatus reference for cyp51A variant calling and antiSMASH baselines.",
+  },
+  {
+    name: "UNITE — fungal ITS reference database",
+    source: "UNITE",
+    accession: "UNITE v9",
+    url: "https://unite.ut.ee/repository.php",
+    description: "Curated fungal ITS sequences for barcoding (Chapter 5).",
+    command: "wget -c https://files.plutof.ut.ee/public/orig/9C/63/...UNITE_public_25.07.2023.fasta.gz",
+  },
+  {
+    name: "Kraken2 PlusPF database (16 GB)",
+    source: "Indexed Bowtie/Kraken",
+    accession: "k2_pluspf_16gb",
+    url: "https://benlangmead.github.io/aws-indexes/k2",
+    size: "16 GB",
+    description: "Used to decontaminate fungal cultures from bacterial / host reads.",
+    command: "wget -c https://genome-idx.s3.amazonaws.com/kraken/k2_pluspf_16gb_20240605.tar.gz\nmkdir k2_pluspf && tar -xzf k2_pluspf_16gb_20240605.tar.gz -C k2_pluspf",
+  },
+];
+
+export const parts: Part[] = [
   {
     title: "Introduction",
     chapters: [
@@ -295,6 +359,95 @@ iqtree2 -s concat.aa.fasta -p partitions.txt -m TESTMERGE -B 1000 -nt AUTO` },
       { id: "ch20", number: "20", title: "Synteny with MCscanX / pyMCscan",
         blocks: [
           { type: "p", text: "Once you have orthogroups, plot syntenic blocks across species to spot rearrangements, lineage-specific regions and horizontal transfer." },
+          { type: "code", text: `# Prepare GFF + protein BED, then run MCScanX
+python -m jcvi.formats.gff bed --type=mRNA --key=ID Af293.gff3 -o Af293.bed
+python -m jcvi.compara.catalog ortholog Af293 Aniger
+python -m jcvi.graphics.dotplot Af293.Aniger.anchors` },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Population genomics",
+    chapters: [
+      { id: "ch20a", number: "20a", title: "Variant calling on diploid Candida",
+        blocks: [
+          { type: "p", text: "C. auris is haploid (--ploidy 1) but C. albicans is diploid — bcftools and GATK behave differently. Use --ploidy 2 with HaplotypeCaller for diploids, and remember that LOH (loss-of-heterozygosity) is a major signal of micro-evolution under antifungal pressure." },
+          { type: "code", text: `gatk HaplotypeCaller -R Ca22.fa -I SAMP.bam -O SAMP.g.vcf.gz \\
+                     --sample-ploidy 2 -ERC GVCF` },
+        ],
+      },
+      { id: "ch20b", number: "20b", title: "cgMLST with chewBBACA",
+        blocks: [
+          { type: "p", text: "Core-genome MLST defines an allele for every gene in the species core. chewBBACA uses your assemblies plus a curated training file to call alleles fast — the C. auris scheme has ~ 1650 loci." },
+          { type: "code", text: `chewBBACA.py CreateSchema -i prot/ -o cauris_schema --ptf C_auris.trn --cpu 8
+chewBBACA.py AlleleCall -i assemblies/ -g cauris_schema/schema_seed -o allele_calls --cpu 8
+chewBBACA.py ExtractCgMLST -i allele_calls/results_alleles.tsv -o cgmlst_out` },
+        ],
+      },
+      { id: "ch20c", number: "20c", title: "Population structure with fastBAPS",
+        blocks: [
+          { type: "p", text: "Once you have a SNP alignment, fastBAPS partitions isolates into hierarchical Bayesian clusters in seconds — useful for assigning new isolates to clades I–V of C. auris." },
+          { type: "code", text: `library(fastbaps)
+sparse <- import_fasta_sparse_nt("cauris.snps.fasta")
+baps   <- best_baps_partition(sparse, fast_baps(sparse))` },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Plant & environmental fungi",
+    chapters: [
+      { id: "ch20d", number: "20d", title: "Effector prediction (EffectorP, SignalP)",
+        blocks: [
+          { type: "p", text: "Plant-pathogenic fungi (Fusarium, Magnaporthe, Zymoseptoria) deploy small secreted effector proteins to suppress host immunity. EffectorP 3.0 classifies them from secretomes." },
+          { type: "code", text: `signalp6 --fastafile proteins.fa --output_dir sigp6 --organism eukarya --mode fast
+EffectorP.py -i sigp6/processed_entries.fasta -o effectorp.tsv` },
+        ],
+      },
+      { id: "ch20e", number: "20e", title: "Mycotoxin BGCs",
+        blocks: [
+          { type: "p", text: "antiSMASH plus the MIBiG knownclusterblast hits will flag aflatoxin (A. flavus), fumonisin (F. verticillioides), trichothecene (F. graminearum) and gliotoxin (A. fumigatus) BGCs. Cross-check against MycoCosm for genomic context." },
+          { type: "tip", text: "If a sample looks negative for an expected toxin BGC, check coverage drop-outs first — Flye sometimes splits BGCs across contigs, hiding clusters from antiSMASH." },
+        ],
+      },
+      { id: "ch20f", number: "20f", title: "Mating type & ploidy detection",
+        blocks: [
+          { type: "p", text: "Mating-type loci (MAT1-1 / MAT1-2) determine sexual compatibility. Use genome-wide k-mer counts (smudgeplot, jellyfish) to confirm ploidy before assembly — diploids can ruin a haploid assembler." },
+          { type: "code", text: `jellyfish count -C -m 21 -s 1G -t 8 SAMP_R1.fq.gz SAMP_R2.fq.gz -o reads.jf
+jellyfish histo -t 8 reads.jf > reads.histo
+genomescope2 -i reads.histo -k 21 -p 2 -o gscope_SAMP` },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Workflows at scale",
+    chapters: [
+      { id: "ch20g", number: "20g", title: "nf-core/funcscan for fungi",
+        blocks: [
+          { type: "p", text: "funcscan is bacteria-first but its AMR + BGC modules (DeepARG, antiSMASH, hAMRonization) are fungi-compatible if you supply --skip_taxa_classification and a fungi-aware annotation." },
+          { type: "code", text: `nextflow run nf-core/funcscan -r 2.0.0 \\
+  --input fungi_samplesheet.csv --run_arg_screening --run_bgc_screening \\
+  --skip_taxa_classification --outdir funcscan_fungi -profile docker` },
+        ],
+      },
+      { id: "ch20h", number: "20h", title: "HPC, SLURM and resource budgeting",
+        blocks: [
+          { type: "table",
+            headers: ["Tool", "CPUs", "RAM", "Walltime / 30 Mb genome"],
+            rows: [
+              ["fastp", "4", "2 GB", "5 min"],
+              ["SPAdes --isolate", "16", "32 GB", "45 min"],
+              ["Flye --nano-hq", "16", "48 GB", "90 min"],
+              ["funannotate predict", "16", "32 GB", "6–8 h"],
+              ["antiSMASH 7", "8", "16 GB", "30 min"],
+              ["OrthoFinder (5 sp)", "32", "32 GB", "2 h"],
+            ],
+          },
+          { type: "code", text: `# Nextflow on SLURM
+nextflow run main.nf -profile slurm,singularity \\
+  --queue normal --max_memory 64.GB --max_cpus 16` },
         ],
       },
     ],
