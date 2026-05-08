@@ -12,7 +12,7 @@ interface Props {
   slug: string;
   chapters: FlatChapter[];
   idx: number;
-  Block: (p: { block: ChapterBlock }) => JSX.Element | null;
+  Block: (p: { block: ChapterBlock }) => ReactElement | null;
 }
 
 export function ChapterPage({ variant, handbookHref, handbookTitle, slug, chapters, idx, Block }: Props) {
