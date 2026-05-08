@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import type { Chapter, ChapterBlock } from "./BookCourse";
