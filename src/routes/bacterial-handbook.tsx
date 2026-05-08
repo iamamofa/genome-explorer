@@ -17,6 +17,7 @@ function BacterialHandbook() {
   return (
     <BookCourse
       variant="bacteria"
+      slug="bacterial-handbook"
       title="Working with Bacterial Genomes"
       authors="Andries van Tonder; Hugo Tavares; Bajuna Salehe"
       published="November 12, 2025"
