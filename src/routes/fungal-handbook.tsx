@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookCourse, type Part } from "@/components/BookCourse";
+import { BookCourse, type Part, type Dataset } from "@/components/BookCourse";
 
 export const Route = createFileRoute("/fungal-handbook")({
   component: FungalHandbook,
