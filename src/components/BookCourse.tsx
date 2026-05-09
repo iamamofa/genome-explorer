@@ -49,6 +49,7 @@ interface Props {
   citation: string;
   parts: Part[];
   datasets?: Dataset[];
+  day0?: Day0Config;
 }
 
 export function BookCourse({ variant, slug, title, authors, published, overview, objectives, audience, prerequisites, citation, parts, datasets = [] }: Props) {
