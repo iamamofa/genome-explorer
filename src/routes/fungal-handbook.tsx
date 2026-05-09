@@ -46,6 +46,32 @@ function FungalHandbook() {
       citation="GenomicsTraining (2025). Working with Fungal Genomes — Handbook edition."
       parts={parts}
       datasets={datasets}
+      day0={{
+        variant: "fungi",
+        trackName: "Fungal Genomics",
+        envName: "fungi",
+        cpus: 8,
+        ramGb: 32,
+        diskGb: 200,
+        condaPackages: [
+          "nextflow=24.*", "fastqc", "fastp", "multiqc", "seqkit",
+          "spades", "flye", "minimap2", "samtools", "bcftools",
+          "polypolish", "medaka", "busco", "quast", "augustus",
+          "funannotate", "antismash=7.*", "orthofinder", "iqtree",
+          "kraken2", "itsx", "vsearch",
+        ],
+        dockerImages: [
+          "nfcore/funcscan:latest",
+          "staphb/flye:latest",
+          "ezlabgva/busco:v5.7.1_cv1",
+          "antismash/standalone:7.1.0",
+        ],
+        datasetCommands: [
+          "wget -c https://zenodo.org/records/14012345/files/cauris_icu.tar.gz",
+          "wget -c https://zenodo.org/records/8378932/files/aspergillus_training.tar.gz",
+          "ls *.tar.gz | xargs -n1 tar -xzf",
+        ],
+      }}
     />
   );
 }
