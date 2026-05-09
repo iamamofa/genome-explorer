@@ -75,7 +75,7 @@ export function BookCourse({ variant, slug, title, authors, published, overview,
   }, [parts, query]);
 
   useEffect(() => {
-    const ids = ["welcome", "datasets", ...parts.flatMap((p) => p.chapters.map((c) => c.id))];
+    const ids = ["welcome", ...(day0 ? ["day0"] : []), "datasets", ...parts.flatMap((p) => p.chapters.map((c) => c.id))];
     const opts = { rootMargin: "-30% 0px -60% 0px", threshold: 0 };
     const obs = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) setActiveId(e.target.id); });
