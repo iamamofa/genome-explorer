@@ -52,7 +52,7 @@ interface Props {
   day0?: Day0Config;
 }
 
-export function BookCourse({ variant, slug, title, authors, published, overview, objectives, audience, prerequisites, citation, parts, datasets = [] }: Props) {
+export function BookCourse({ variant, slug, title, authors, published, overview, objectives, audience, prerequisites, citation, parts, datasets = [], day0 }: Props) {
   const accent = variant === "fungi" ? "bg-gradient-fungi" : "bg-gradient-bacteria";
   const [activeId, setActiveId] = useState<string>("welcome");
   const [sidebarOpen, setSidebarOpen] = useState(false);
