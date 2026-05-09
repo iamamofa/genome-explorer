@@ -210,6 +210,8 @@ export function BookCourse({ variant, slug, title, authors, published, overview,
               </div>
             </section>
 
+            {day0 && <Day0Setup config={day0} />}
+
             {datasets.length > 0 && <DatasetsSection datasets={datasets} accent={accent} />}
 
             <hr className="my-12 border-border" />
