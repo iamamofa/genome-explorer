@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { Day0Setup, type Day0Config } from "./Day0Setup";
 
 export interface ChapterBlock {
   type: "p" | "h3" | "tip" | "warn" | "list" | "ol" | "code" | "table" | "callout" | "figure";
