@@ -236,29 +236,79 @@ function DatasetsSection({ datasets, accent }: { datasets: Dataset[]; accent: st
         <span className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 font-mono text-sm font-semibold text-white ${accent}`}>📦</span>
         <h2 className="font-display text-3xl font-semibold">Course Datasets</h2>
       </div>
-      <p className="mt-2 text-muted-foreground">All datasets used by the practical chapters. Click <em>Open</em> to visit the source page, or copy the download command.</p>
+      <p className="mt-2 text-muted-foreground">All datasets used in the practical chapters. Click <em>Download</em> to fetch the archive directly, <em>Source</em> to view the record, or <em>Copy command</em> to grab the terminal command.</p>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {datasets.map((d) => (
-          <div key={d.accession} className="rounded-xl border border-border bg-background p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="font-display text-lg font-semibold leading-tight">{d.name}</h3>
-                <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-                  {d.source} · <span className="font-mono normal-case">{d.accession}</span>{d.size && <> · {d.size}</>}
-                </p>
-              </div>
-              <a href={d.url} target="_blank" rel="noreferrer" className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold text-white ${accent}`}>Open ↗</a>
-            </div>
-            <p className="mt-3 text-sm text-foreground/90">{d.description}</p>
-            {d.command && (
-              <pre className="mt-3 overflow-x-auto rounded-md bg-foreground/95 p-3 font-mono text-[12px] leading-snug text-background">
-                <code>{d.command}</code>
-              </pre>
-            )}
-          </div>
+          <DatasetCard key={d.accession} d={d} accent={accent} />
         ))}
       </div>
     </section>
+  );
+}
+
+function DatasetCard({ d, accent }: { d: Dataset; accent: string }) {
+  const [copied, setCopied] = useState(false);
+  // Try to extract a direct file URL from the wget command for one-click download
+  const directUrl = (() => {
+    if (!d.command) return null;
+    const m = d.command.match(/https?:\/\/\S+/);
+    return m ? m[0] : null;
+  })();
+
+  const onCopy = () => {
+    if (!d.command || typeof window === "undefined") return;
+    navigator.clipboard?.writeText(d.command);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-background p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="font-display text-lg font-semibold leading-tight">{d.name}</h3>
+          <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
+            {d.source} · <span className="font-mono normal-case">{d.accession}</span>{d.size && <> · {d.size}</>}
+          </p>
+        </div>
+      </div>
+      <p className="mt-3 text-sm text-foreground/90">{d.description}</p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {directUrl && (
+          <a
+            href={directUrl}
+            download
+            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-white ${accent} hover:opacity-90`}
+          >
+            ⬇ Download
+          </a>
+        )}
+        <a
+          href={d.url}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-accent"
+        >
+          Source ↗
+        </a>
+        {d.command && (
+          <button
+            type="button"
+            onClick={onCopy}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-accent"
+          >
+            {copied ? "✓ Copied" : "📋 Copy command"}
+          </button>
+        )}
+      </div>
+
+      {d.command && (
+        <pre className="mt-3 overflow-x-auto rounded-md bg-foreground/95 p-3 font-mono text-[12px] leading-snug text-background">
+          <code>{d.command}</code>
+        </pre>
+      )}
+    </div>
   );
 }
 
