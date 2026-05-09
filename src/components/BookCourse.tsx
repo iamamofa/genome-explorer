@@ -123,6 +123,11 @@ export function BookCourse({ variant, slug, title, authors, published, overview,
               <a href="#welcome" onClick={() => setSidebarOpen(false)} className={`block rounded px-2 py-1.5 ${activeId === "welcome" ? "bg-accent font-semibold text-foreground" : "text-muted-foreground hover:bg-accent/50"}`}>
                 Welcome
               </a>
+              {day0 && (
+                <a href="#day0" onClick={() => setSidebarOpen(false)} className={`block rounded px-2 py-1.5 ${activeId === "day0" ? "bg-accent font-semibold text-foreground" : "text-muted-foreground hover:bg-accent/50"}`}>
+                  🛠 Day 0 — Setup
+                </a>
+              )}
               {datasets.length > 0 && (
                 <a href="#datasets" onClick={() => setSidebarOpen(false)} className={`block rounded px-2 py-1.5 ${activeId === "datasets" ? "bg-accent font-semibold text-foreground" : "text-muted-foreground hover:bg-accent/50"}`}>
                   📦 Datasets ({datasets.length})
