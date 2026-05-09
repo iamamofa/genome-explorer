@@ -48,6 +48,32 @@ function BacterialHandbook() {
       citation='van Tonder, A., Tavares, H., Salehe, B. (2025). Working with Bacterial Genomes. Adapted from cambiotraining.github.io/bacterial-genomics/'
       parts={parts}
       datasets={datasets}
+      day0={{
+        variant: "bacteria",
+        trackName: "Bacterial Genomics",
+        envName: "bact",
+        cpus: 8,
+        ramGb: 16,
+        diskGb: 100,
+        condaPackages: [
+          "nextflow=24.*", "fastqc", "fastp", "multiqc", "seqkit",
+          "spades", "bwa", "samtools", "bcftools", "snippy",
+          "iqtree", "gubbins", "mlst", "abricate", "prokka", "bakta",
+          "kraken2", "krakentools", "amrfinderplus", "tb-profiler",
+        ],
+        dockerImages: [
+          "nfcore/bacqc:latest",
+          "nfcore/bactmap:latest",
+          "staphb/spades:latest",
+          "staphb/bakta:latest",
+        ],
+        datasetCommands: [
+          "wget -c https://zenodo.org/records/8208161/files/cholera_subset.tar.gz",
+          "wget -c https://zenodo.org/records/10650190/files/mtb_training.tar.gz",
+          "wget -c https://zenodo.org/records/14191636/files/pneumo_outbreak.tar.gz",
+          "ls *.tar.gz | xargs -n1 tar -xzf",
+        ],
+      }}
     />
   );
 }
