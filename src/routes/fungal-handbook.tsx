@@ -46,6 +46,32 @@ function FungalHandbook() {
       citation="GenomicsTraining (2025). Working with Fungal Genomes — Handbook edition."
       parts={parts}
       datasets={datasets}
+      day0={{
+        variant: "fungi",
+        trackName: "Fungal Genomics",
+        envName: "fungi",
+        cpus: 8,
+        ramGb: 32,
+        diskGb: 200,
+        condaPackages: [
+          "nextflow=24.*", "fastqc", "fastp", "multiqc", "seqkit",
+          "spades", "flye", "minimap2", "samtools", "bcftools",
+          "polypolish", "medaka", "busco", "quast", "augustus",
+          "funannotate", "antismash=7.*", "orthofinder", "iqtree",
+          "kraken2", "itsx", "vsearch",
+        ],
+        dockerImages: [
+          "nfcore/funcscan:latest",
+          "staphb/flye:latest",
+          "ezlabgva/busco:v5.7.1_cv1",
+          "antismash/standalone:7.1.0",
+        ],
+        datasetCommands: [
+          "wget -c https://zenodo.org/records/14012345/files/cauris_icu.tar.gz",
+          "wget -c https://zenodo.org/records/8378932/files/aspergillus_training.tar.gz",
+          "ls *.tar.gz | xargs -n1 tar -xzf",
+        ],
+      }}
     />
   );
 }
@@ -120,7 +146,30 @@ export const parts: Part[] = [
         summary: "Why fungal genomics is harder than bacterial genomics, and where this course sits.",
         blocks: [
           { type: "p", text: "Fungi have eukaryotic genomes — introns, repeats, sometimes multiple nuclei, sometimes haploid then diploid in the same life cycle. That means tools borrowed from bacteria (Prokka, Roary, Snippy) generally do not work, and the assembly contiguity / completeness bar is much harder to clear." },
-          { type: "p", text: "Across the week you will assemble a Candida auris genome, mine an Aspergillus fumigatus genome for biosynthetic gene clusters, build orthogroups across five Aspergillus species, and finish with a simulated C. auris outbreak in a hospital ICU." },
+          { type: "p", text: "Fungal genome sizes range from ~10 Mb (Saccharomyces cerevisiae) to >2 Gb (some rusts and smuts). Repeat content can exceed 70 %. Some species are obligate dikaryons (two haploid nuclei per cell); others switch ploidy mid-life-cycle. Annotating a fungal genome correctly is itself a 1–2 day pipeline involving ab-initio prediction, transcript evidence, and homology — there is no equivalent of Prokka's 30-second annotation." },
+          { type: "h3", text: "Where fungal genomics matters today" },
+          { type: "list", items: [
+            "Clinical: Candida auris is a WHO-priority pathogen with multi-drug-resistant outbreaks across ICUs worldwide.",
+            "Agricultural: Magnaporthe oryzae (rice blast) and Fusarium graminearum (wheat scab) destroy 10–30 % of global staple yield annually.",
+            "Industrial: Aspergillus, Penicillium and Trichoderma supply enzymes, antibiotics and food fermentations worth >$30 B/year.",
+            "Environmental: Mycorrhizal fungi mediate carbon cycling; pathogenic fungi (Batrachochytrium) are driving amphibian extinctions.",
+          ] },
+          { type: "h3", text: "What you will do this week" },
+          { type: "ol", items: [
+            "Day 1 — Linux, Conda, ITS barcoding with ITSx + vsearch, and shotgun QC on Aspergillus reads.",
+            "Day 2 — Hybrid assembly: Flye on ONT long reads, polishing with Polypolish + Pilon using Illumina short reads.",
+            "Day 3 — Assembly QC with QUAST and BUSCO; gene prediction with funannotate (AUGUSTUS + EVM + tRNAscan-SE).",
+            "Day 4 — Comparative genomics: OrthoFinder across five Aspergillus species; species tree with IQ-TREE on single-copy orthologues.",
+            "Day 5 — antiSMASH 7 BGC mining, antifungal-resistance profiling, and a Candida auris ICU outbreak capstone.",
+          ] },
+          { type: "h3", text: "What this course is NOT" },
+          { type: "list", items: [
+            "Not a metabarcoding / ITS amplicon course beyond Chapter 5 — see QIIME 2 / DADA2 tutorials for that.",
+            "Not a wet-lab DNA extraction course — fungal CTAB / bead-beating protocols are out of scope but flagged.",
+            "Not a yeast genetics course — we treat S. cerevisiae as a reference, not a model.",
+          ] },
+          { type: "tip", text: "Fungal pipelines are slower than bacterial ones — a hybrid assembly takes 2–6 hours on a workshop laptop. Plan to start long-running steps before lunch and review results after. Use tmux or screen so you don't lose progress when the SSH connection drops." },
+          { type: "callout", text: "RAM is the silent killer in fungal work. BUSCO with the fungi_odb10 lineage uses ~6 GB; antiSMASH 7 with full HMMs uses ~12 GB. Budget 32 GB and you'll rarely hit OOM." },
         ],
       },
       { id: "ch2", number: "2", title: "Data & Setup",

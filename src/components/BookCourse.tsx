@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { Day0Setup, type Day0Config } from "./Day0Setup";
 
 export interface ChapterBlock {
   type: "p" | "h3" | "tip" | "warn" | "list" | "ol" | "code" | "table" | "callout" | "figure";
@@ -48,9 +49,10 @@ interface Props {
   citation: string;
   parts: Part[];
   datasets?: Dataset[];
+  day0?: Day0Config;
 }
 
-export function BookCourse({ variant, slug, title, authors, published, overview, objectives, audience, prerequisites, citation, parts, datasets = [] }: Props) {
+export function BookCourse({ variant, slug, title, authors, published, overview, objectives, audience, prerequisites, citation, parts, datasets = [], day0 }: Props) {
   const accent = variant === "fungi" ? "bg-gradient-fungi" : "bg-gradient-bacteria";
   const [activeId, setActiveId] = useState<string>("welcome");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -73,7 +75,7 @@ export function BookCourse({ variant, slug, title, authors, published, overview,
   }, [parts, query]);
 
   useEffect(() => {
-    const ids = ["welcome", "datasets", ...parts.flatMap((p) => p.chapters.map((c) => c.id))];
+    const ids = ["welcome", ...(day0 ? ["day0"] : []), "datasets", ...parts.flatMap((p) => p.chapters.map((c) => c.id))];
     const opts = { rootMargin: "-30% 0px -60% 0px", threshold: 0 };
     const obs = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) setActiveId(e.target.id); });
@@ -121,6 +123,11 @@ export function BookCourse({ variant, slug, title, authors, published, overview,
               <a href="#welcome" onClick={() => setSidebarOpen(false)} className={`block rounded px-2 py-1.5 ${activeId === "welcome" ? "bg-accent font-semibold text-foreground" : "text-muted-foreground hover:bg-accent/50"}`}>
                 Welcome
               </a>
+              {day0 && (
+                <a href="#day0" onClick={() => setSidebarOpen(false)} className={`block rounded px-2 py-1.5 ${activeId === "day0" ? "bg-accent font-semibold text-foreground" : "text-muted-foreground hover:bg-accent/50"}`}>
+                  🛠 Day 0 — Setup
+                </a>
+              )}
               {datasets.length > 0 && (
                 <a href="#datasets" onClick={() => setSidebarOpen(false)} className={`block rounded px-2 py-1.5 ${activeId === "datasets" ? "bg-accent font-semibold text-foreground" : "text-muted-foreground hover:bg-accent/50"}`}>
                   📦 Datasets ({datasets.length})
@@ -202,6 +209,8 @@ export function BookCourse({ variant, slug, title, authors, published, overview,
                 </div>
               </div>
             </section>
+
+            {day0 && <Day0Setup config={day0} />}
 
             {datasets.length > 0 && <DatasetsSection datasets={datasets} accent={accent} />}
 
