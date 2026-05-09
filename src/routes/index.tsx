@@ -277,3 +277,25 @@ const resources = [
   { tag: "AMR", title: "CARD Database", desc: "Comprehensive Antibiotic Resistance Database.", url: "https://card.mcmaster.ca" },
   { tag: "Fungi", title: "FungiDB", desc: "Functional genomics resource for fungal species.", url: "https://fungidb.org" },
 ];
+
+const curriculum = [
+  { day: "Day 1", title: "Foundations & QC", summary: "Linux refresher, sequencing chemistry, FastQC/fastp on real Illumina reads." },
+  { day: "Day 2", title: "Assembly & mapping", summary: "De novo assembly (SPAdes/Flye) and reference mapping (BWA, bactmap)." },
+  { day: "Day 3", title: "Annotation & typing", summary: "Genome annotation, MLST, serotyping, and AMR / virulence profiling." },
+  { day: "Day 4", title: "Phylogenomics", summary: "Core-genome alignment, IQ-TREE, recombination removal, time-trees." },
+  { day: "Day 5", title: "Outbreak capstone", summary: "End-to-end outbreak investigation with a written public-health report." },
+];
+
+const audiences = [
+  { title: "Clinical & public-health labs", desc: "Hospital microbiologists and surveillance teams running AMR and outbreak workflows." },
+  { title: "MSc / PhD students", desc: "Researchers needing a solid, reproducible foundation in microbial genomics." },
+  { title: "Bioinformatics newcomers", desc: "Wet-lab scientists transitioning into command-line and pipeline-based analysis." },
+];
+
+const faqs = [
+  { q: "Do I need prior bioinformatics experience?", a: "No. We start with a Linux & CLI primer, then build up. Comfort with biology fundamentals (DNA, sequencing) is enough." },
+  { q: "What hardware do I need?", a: "Any laptop with a modern browser. Practicals run on a provided cloud VM or your own machine via Conda/Mamba environments." },
+  { q: "Are the datasets really public?", a: "Yes — every dataset is hosted on Zenodo, ENA, or NCBI with a stable accession. Each card has a one-click Download button and a copy-ready wget command." },
+  { q: "Can I take just one track?", a: "Absolutely. The Bacterial and Fungal handbooks are independent. Most learners pick one and complete the Linux primer alongside it." },
+  { q: "Is there a certificate?", a: "Learners who complete a track's capstone exercise receive a signed certificate of completion from the GenomicsTraining team." },
+];
